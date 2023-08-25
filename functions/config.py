@@ -14,7 +14,8 @@ class Configuration():
         with open(str(self.pathToConfigFiles/'experiment.yml'), "r") as ymlfile:
             self.experiment = yaml.safe_load(ymlfile)  
 
-    def save(self, pathToSave: Path, basename: str = 'Experiment_configuration') -> None:
+    def saveConfiguration(self, pathToSave: Path, basename: str = 'Experiment_configuration') -> None:
+        '''save the acutal configuration as text file to the provided path'''
         self.read_files()
         filename = str(pathToSave / f'{basename}.txt')
         with open(filename,'w') as f:
@@ -64,6 +65,6 @@ if __name__ == '__main__':
     print(conf.experiment)
     print(conf.labjack)
 
-    conf.save(pathToSave=configPath, basename='test_config')
+    conf.saveConfiguration(pathToSave=configPath, basename='test_config')
 
     print('Done')

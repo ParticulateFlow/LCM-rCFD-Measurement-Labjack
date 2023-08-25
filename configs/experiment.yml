@@ -5,7 +5,7 @@ COMMENT: 'A clever comment of the experiment I have made ;-)'
 SAMPLE_RATE: 3 # maximum of 4
 
 # Setup
-INLET: 'ring' # (ring, one side)
+INLET: 'single' # (ring, single)
 OUTLET: 'middle' # (top, middle, bottom)
 THERMOSTAT: 60 # heater thermostat setting
 
