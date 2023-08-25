@@ -1,8 +1,8 @@
 from pathlib import Path
 import csv
 import os
-from measurementHandler import MeasurementDataHandler
-from periodicHandler import periodicFunctionHandler
+from .measurementHandler import MeasurementDataHandler
+from .periodicHandler import periodicFunctionHandler
 
 
 class ExperimentHandler():
@@ -14,11 +14,13 @@ class ExperimentHandler():
         self.data.append(sample)
         self.mdh.printCMD()
 
-    def start(self,  pathToSave: Path):
-        '''starts an experiment'''
+    def setPathToSave(self, pathToSave: Path):
         self.pathToSave = pathToSave
+
+    def start(self):
+        '''starts an experiment'''
+
         print('Start measurement')
-        
         self.data = []
         self.pfh = periodicFunctionHandler(func = self._measure)
         self.pfh.start(sample_rate = self.mdh.sample_rate)
@@ -26,7 +28,8 @@ class ExperimentHandler():
 
     def stop(self):
         '''stops an experiment'''
-        self.pfh.stop(), os.system('cls')
+        self.pfh.stop()
+        os.system('cls')
         print('Stop Measurement')
 
         print('Save Data')
@@ -65,11 +68,11 @@ if __name__ == '__main__':
 
     config = Configuration(pathToConfigFiles=configPath)
     exp_handler = ExperimentHandler(mdh=MeasurementDataHandler(device=labjack, configuration=config))
-    
+    exp_handler.setPathToSave(pathToSave=savePath)
     
     window = tk.Tk()
     window.title('Test experimentHandler')
-    ttk.Button(window, text='Experiment Start', command= lambda: exp_handler.start(savePath)).pack()
+    ttk.Button(window, text='Experiment Start', command= exp_handler.start).pack()
     ttk.Button(window, text='Experiment Stop', command=exp_handler.stop).pack()
     window.mainloop()
     

@@ -1,6 +1,12 @@
-from config import Configuration
-from sensors import PT100, Flowmeter, Switch
-from periodicHandler import periodicFunctionHandler
+if __name__ == '__main__':
+    from config import Configuration
+    from sensors import PT100, Flowmeter, Switch
+    from periodicHandler import periodicFunctionHandler
+else:
+    from .config import Configuration
+    from .sensors import PT100, Flowmeter, Switch
+    from .periodicHandler import periodicFunctionHandler
+
 from labjack import ljm
 from datetime import datetime
 import os
@@ -12,18 +18,21 @@ class MeasurementDataHandler():
     def __init__(self, device:ljm, configuration: Configuration) -> None:
         self.device = device
         self.conf = configuration
-        self.SENSOR_LIST = []
+        self.SENSOR_LIST = {}
         def appendSensorCategory(Category: str, sensorClass) -> None:
             for name, ch in self.conf.labjack[Category].items():
                 s = sensorClass()
                 s.setChannel(device = self.device, sensor_name = name, channel = ch)
-                self.SENSOR_LIST.append(s)
+                self.SENSOR_LIST[name] = s
         appendSensorCategory('PT100', PT100)
         appendSensorCategory('Flowmeter', Flowmeter)
         appendSensorCategory('Switch', Switch)
 
-        self.sensor_names = [s.sensor_name for s in self.SENSOR_LIST]
+        self.sensor_names = [s for s in self.SENSOR_LIST.keys()]
         self.sensor_names.insert(0, 'timestamp')
+
+    def getSensorByName(self, name):
+        return self.SENSOR_LIST[name]
 
     @property
     def sample_rate(self) -> int:
@@ -46,18 +55,24 @@ class MeasurementDataHandler():
     def printCMD(self) -> str:
         '''print all sensor data to the command'''
         os.system('cls')
-        [print(s) for s in self.SENSOR_LIST] 
+        [print(s) for s in self.SENSOR_LIST.values()] 
 
     def all_sensor_values(self) -> list:
         '''returns the measured data as a list with timestamp'''
-        data = [s.value for s in self.SENSOR_LIST]
+        data = [s.value for s in self.SENSOR_LIST.values()]
         data.insert(0, self.timestamp.strftime('%Y%m%d_%H%M%S_%f'))
         return data
     
 if __name__ == '__main__':
+    from config import Configuration
 
     labjack = ljm.openS("T7", "USB", "ANY") # labjack T7 Pro
     config = Configuration(pathToConfigFiles=Path(__file__).parent.parent.absolute() / 'configs')
     mdh = MeasurementDataHandler(device=labjack, configuration=config)
 
     mdh.printCMD()
+
+    print('\n Sensor Class')
+    sensor = mdh.getSensorByName(name='Twarm')
+    print(type(sensor))
+    print(sensor)
