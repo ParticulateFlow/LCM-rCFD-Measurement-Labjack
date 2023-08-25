@@ -31,11 +31,8 @@ class Sensors(ABC):
         '''representation of sensor e.g.: T1 = 25.1°C '''
         if isinstance(self.value, float):
             return f'{self.sensor_name} = {self.value:.1f}{self.unit}'
-        if isinstance(self.value, bool):
-            if self.value:
-                return f'{self.sensor_name} = warm'
-            else:
-                return f'{self.sensor_name} = cold'
+        else:
+            return f'{self.sensor_name} = {self.value}'
     
 class PT100(Sensors):
     ''' PT100 sensor
@@ -69,7 +66,7 @@ class Flowmeter(Sensors):
 
     @property
     def unit(self) -> str:
-        return 'ml/min'
+        return 'ml/s'
 
     @property
     def value(self) -> float:
@@ -79,7 +76,7 @@ class Flowmeter(Sensors):
 
         I = self.voltage/self.R_shunt # current
         if I < 4*1e-3: I = 4*1e-3 # correct no flow
-        return round(k*I + d, 4)
+        return round((k*I + d)/60, 2)
 
 class Switch(Sensors):
 
@@ -91,12 +88,12 @@ class Switch(Sensors):
         return '[1]'
 
     @property
-    def value(self) -> bool:
+    def value(self) -> str:
         ''''logic true/false'''
-        if self.voltage <= 1: # False
-            return False
-        else:
-            return True
+        if self.voltage <= 1: # cold
+            return 'cold'
+        else: # warm
+            return 'warm'
 
 
 if __name__ == '__main__':

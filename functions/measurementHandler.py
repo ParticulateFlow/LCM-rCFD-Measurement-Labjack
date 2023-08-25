@@ -54,8 +54,10 @@ class MeasurementDataHandler():
 
     def printCMD(self) -> str:
         '''print all sensor data to the command'''
-        os.system('cls')
-        [print(s) for s in self.SENSOR_LIST.values()] 
+        data = self.SENSOR_LIST.values()
+        [print(s) for s in data]
+        # Go with cursor up
+        print(f"\r\033[{len(data)}A", end="")
 
     def all_sensor_values(self) -> list:
         '''returns the measured data as a list with timestamp'''

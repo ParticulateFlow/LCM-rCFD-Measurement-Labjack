@@ -19,7 +19,7 @@ class ExperimentHandler():
 
     def start(self):
         '''starts an experiment'''
-
+        os.system('cls')
         print('Start measurement')
         self.data = []
         self.pfh = periodicFunctionHandler(func = self._measure)
@@ -28,8 +28,8 @@ class ExperimentHandler():
 
     def stop(self):
         '''stops an experiment'''
-        self.pfh.stop()
         os.system('cls')
+        self.pfh.stop()
         print('Stop Measurement')
 
         print('Save Data')
