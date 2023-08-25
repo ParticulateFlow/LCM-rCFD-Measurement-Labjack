@@ -1,0 +1,16 @@
+PT100:
+  Twarm: AIN0
+  Tcold: AIN1
+  Tout: AIN2
+  h=35mm: AIN3
+  h=65mm: AIN4
+  h=95mm: AIN5
+  h=125mm: AIN6
+  h=155mm: AIN7
+  h=185mm: AIN8
+  h=215mm: AIN9
+Flowmeter:
+  warm_massflow: AIN11
+  cold_massflow: AIN13
+Switch:
+  warm/cold: AIN10
