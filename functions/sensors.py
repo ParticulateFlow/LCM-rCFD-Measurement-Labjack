@@ -30,9 +30,9 @@ class Sensors(ABC):
     def __repr__(self) -> str:
         '''representation of sensor e.g.: T1 = 25.1°C '''
         if isinstance(self.value, float):
-            return f'{self.sensor_name} = {self.value:.1f}{self.unit}'
+            return f'{self.sensor_name}:\t{self.value:.1f}{self.unit}'
         else:
-            return f'{self.sensor_name} = {self.value}'
+            return f'{self.sensor_name}:\t{self.value}'
     
 class PT100(Sensors):
     ''' PT100 sensor

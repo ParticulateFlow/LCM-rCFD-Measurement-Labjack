@@ -8,6 +8,8 @@ from .periodicHandler import periodicFunctionHandler
 class ExperimentHandler():
     def __init__(self, mdh: MeasurementDataHandler) -> None:
         self.mdh = mdh
+        self.data = []
+        self.STATUS = False # not running
 
     def _measure(self):
         sample = self.mdh.all_sensor_values()
@@ -19,6 +21,7 @@ class ExperimentHandler():
 
     def start(self):
         '''starts an experiment'''
+        self.STATUS = True
         os.system('cls')
         print('Start measurement')
         self.data = []
@@ -28,6 +31,7 @@ class ExperimentHandler():
 
     def stop(self):
         '''stops an experiment'''
+        self.STATUS = False
         os.system('cls')
         self.pfh.stop()
         print('Stop Measurement')
@@ -41,7 +45,11 @@ class ExperimentHandler():
             csvwriter = csv.writer(file)
             csvwriter.writerow(self.mdh.sensor_names) # header
             csvwriter.writerows(self.data) 
-        print('Measurement data saved')    
+        print('Measurement data saved') 
+
+    @property
+    def is_running(self):
+        return self.STATUS  
 
     def _createDirectory(self):
         self.dirname = self.mdh.timestamp.strftime('%Y%m%d_%H%M%S')

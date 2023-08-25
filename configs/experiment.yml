@@ -1,12 +1,12 @@
 # Experiment configuration file
-COMMENT: 'A clever comment of the experiment I have made ;-)'
-
+#COMMENT: 'A clever comment of the experiment I have made ;-)'
+COMMENT: 'step response'
 # Measurement
-SAMPLE_RATE: 3 # maximum of 4
+SAMPLE_RATE: 3 # maximum of 3
 
 # Setup
-INLET: 'single' # (ring, single)
+INLET: 'ring' # (ring, single)
 OUTLET: 'middle' # (top, middle, bottom)
-THERMOSTAT: 60 # heater thermostat setting
+THERMOSTAT: 50 # heater thermostat setting
 
 

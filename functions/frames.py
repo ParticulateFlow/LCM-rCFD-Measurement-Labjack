@@ -24,55 +24,40 @@ class Frame_aquisitionControl(tk.Frame):
 class Frame_massflow(tk.Frame):
     def __init__(self, parent, name:str, mDot_Sensor: Flowmeter, T_Sensor: PT100):
         super().__init__(master=parent, highlightbackground="gray", highlightthickness=1)
-        self.mDot_Sensor = mDot_Sensor
-        self.T_Sensor = T_Sensor
+        self.mDot_sensor = mDot_Sensor
+        self.T_sensor = T_Sensor
 
-        self.grid_rowconfigure((0,1,2), weight=2, uniform='a')
-        self.grid_columnconfigure((0,1), weight=1, uniform='a')
+        ttk.Label(self,text=name, font=('Arial', 14, 'bold')).pack()
+        self.label1 = ttk.Label(self)
+        self.label2 = ttk.Label(self)
 
-        self.mDot_var = tk.DoubleVar()
-        self.T_var = tk.DoubleVar()
-
-        ttk.Label(self,text=name, font=('Arial', 14, 'bold')).grid(row=0,column=0, columnspan=2)
-
-        ttk.Label(self, text=self.mDot_Sensor.sensor_name).grid(row=1, column=0)
-        ttk.Label(self, textvariable=self.mDot_var).grid(row=2, column=0)
-
-        ttk.Label(self, text=self.T_Sensor.sensor_name).grid(row=1, column=1)
-        ttk.Label(self, textvariable=self.T_var).grid(row=2, column=1)
+        self.label1.pack()
+        self.label2.pack()
 
         self._setVars()
 
     def _setVars(self):
-        prec = 1
-        self.mDot_var.set(round(self.mDot_Sensor.value,prec))
-        self.T_var.set(round(self.T_Sensor.value,prec))
-        self.after(100, self._setVars)
+        self.label1.config(text=str(self.mDot_sensor))
+        self.label2.config(text=str(self.T_sensor))
 
-class Frame_Box_Single_Temp(tk.Frame):
-    def __init__(self, parent, sensor: PT100):
-        super().__init__(master=parent)
-        self.sensor = sensor
-        self.T_var = tk.DoubleVar()
-        self.grid_rowconfigure(1, weight=1, uniform='a')
-        self.grid_columnconfigure((0,1), weight=1, uniform='a')
-
-        ttk.Label(self, text=sensor.sensor_name).grid(row=0, column=0)
-        ttk.Label(self, textvariable=self.T_var).grid(row=0, column=1)
-
-        self._setVars()
-
-    def _setVars(self):
-        prec = 1
-        self.T_var.set(round(self.sensor.value,prec))
-        self.after(100, self._setVars)
+        self.after(1000, self._setVars)
 
 class Frame_Box_Temps(tk.Frame):
     def __init__(self, parent, name:str, sensorsList: list[PT100]):
         super().__init__(master = parent, highlightbackground="gray", highlightthickness=1)
+        self.sensorList = sensorsList[::-1]
+        self.labelList = []
         ttk.Label(self,text=name, font=('Arial', 14, 'bold')).pack()
-        for i,sensor in enumerate(sensorsList):
-            Frame_Box_Single_Temp(parent=self, sensor=sensor).pack()
+        for _ in range(len(self.sensorList)):
+            t = ttk.Label(self)
+            t.pack(pady=5)
+            self.labelList.append(t)
+        self._setVars()
+
+    def _setVars(self):
+        for label,sens in zip(self.labelList, self.sensorList):
+            label.config(text=str(sens))
+        self.after(1000, self._setVars)
 
 class Frame_Switch(tk.Frame):
     def __init__(self, parent, name,  switch: Switch):
@@ -90,22 +75,21 @@ class Frame_Switch(tk.Frame):
         if self.switch.value == 'cold':
             self.config(bg='blue')
         self.mode.set(self.switch.value)
-        self.after(100, self._setVar)
+        self.after(1000, self._setVar)
 
 class Frame_Tout(tk.Frame):
     def __init__(self, parent, name, sensor: PT100):
         super().__init__(master=parent, highlightbackground="gray", highlightthickness=1)
         self.sensor = sensor
-        self.T_var = tk.DoubleVar()
-
+    
         ttk.Label(self, text=name,font=('Arial', 14, 'bold')).pack()
-        ttk.Label(self, textvariable=self.T_var).pack()
+        self.label = ttk.Label(self, text=str(sensor))
+        self.label.pack()
         self._setVar()
     
     def _setVar(self):
-        prec = 1
-        self.T_var.set(round(self.sensor.value, 1))
-        self.after(100, self._setVar)
+        self.label.config(text=str(self.sensor))
+        self.after(1000, self._setVar)
 
 
 class Frame_DataOverview(tk.Frame):

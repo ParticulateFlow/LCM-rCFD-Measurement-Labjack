@@ -35,10 +35,14 @@ class MeasurementDataHandler():
         return self.SENSOR_LIST[name]
 
     @property
-    def sample_rate(self) -> int:
+    def sample_rate(self) -> float:
         '''sample rate in sample/seconds'''
-        return int(self.conf.experiment['SAMPLE_RATE'])
+        return float(self.conf.experiment['SAMPLE_RATE'])
     
+    @property
+    def thermostat(self) -> int:
+        return int(self.conf.experiment['THERMOSTAT'])
+
     @property
     def inlet_conf(self) -> str:
         return self.conf.experiment['INLET']
