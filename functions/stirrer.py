@@ -12,7 +12,8 @@ class IKA_Ministar40():
         except:
             raise ConnectionError("Device not connected")
 
-        print(f"Device found: {ports[index].name}:{ports[index].description}")
+        print("Device found:")
+        print(f"{ports[index].name}:{ports[index].description}")
         self.device = ports[index].name
 
         self.reset()
@@ -159,7 +160,7 @@ class Frame_Stirrer(tk.Frame):
 
 
 if __name__ == "__main__":
-    stirrer = IKA_Ministar40(usbName = 'STM', speedLimit=120)
+    stirrer = IKA_Ministar40(usbName = 'USB', speedLimit=120)
     window = tk.Tk()
     window.title('rCFD Experiment')
     Frame_Stirrer(window, stirrer=stirrer).pack()

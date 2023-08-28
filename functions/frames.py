@@ -4,7 +4,7 @@ from tkinter import ttk
 from .measurementHandler import MeasurementDataHandler
 from .experimentHandler import ExperimentHandler
 from .sensors import PT100, Flowmeter, Switch
-
+from .stirrer import Frame_Stirrer
 
 class Frame_aquisitionControl(tk.Frame):
     def __init__(self, parent, handler: ExperimentHandler):
@@ -118,9 +118,12 @@ class Frame_DataOverview(tk.Frame):
         T_Sensor = mdh.getSensorByName('Tout')
         frame_out = Frame_Tout(self, 'Output', T_Sensor)
 
+        frame_stirrer = Frame_Stirrer(parent=self, stirrer=mdh.stirrer)
+
         #layout
         frame_warm.grid(row=0, column=0, sticky='nsew')
         frame_switch.grid(row=1, column=0, sticky='nsew')
         frame_cold.grid(row=2, column=0, sticky='nsew')
         frame_Box.grid(row=0, column=1, rowspan=3, sticky='nsew')
-        frame_out.grid(row=0, column=2, rowspan=3, sticky='nsew')
+        frame_out.grid(row=0, column=2, sticky='nsew')
+        frame_stirrer.grid(row=1, column=2, rowspan=2, sticky='nsew')

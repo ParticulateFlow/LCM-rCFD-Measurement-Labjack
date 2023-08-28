@@ -12,11 +12,13 @@ from datetime import datetime
 import os
 from datetime import datetime
 from pathlib import Path
+from .stirrer import IKA_Ministar40
 
 class MeasurementDataHandler():
     '''handler for managing all sensors connected to the labjack device and configured by a yaml file'''
-    def __init__(self, device:ljm, configuration: Configuration) -> None:
+    def __init__(self, device:ljm, stirrer: IKA_Ministar40, configuration: Configuration) -> None:
         self.device = device
+        self.stirrer = stirrer
         self.conf = configuration
         self.SENSOR_LIST = {}
         def appendSensorCategory(Category: str, sensorClass) -> None:

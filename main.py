@@ -5,6 +5,7 @@ from functions.config import Configuration
 from functions.measurementHandler import MeasurementDataHandler
 from functions.experimentHandler import ExperimentHandler
 from functions.frames import Frame_DataOverview, Frame_aquisitionControl
+from functions.stirrer import IKA_Ministar40
 
 from labjack import ljm
 from pathlib import Path
@@ -59,6 +60,7 @@ class Frame_timeplot(tk.Frame):
 if __name__ == '__main__':
     # my used device
     labjack = ljm.openS("T7", "USB", "ANY") # labjack T7 Pro
+    ministar40 = IKA_Ministar40(usbName = 'USB', speedLimit=120)
 
     # my paths
     configPath = Path(__file__).parent.absolute() / 'configs'
@@ -66,9 +68,10 @@ if __name__ == '__main__':
 
     # my handlers
     config = Configuration(pathToConfigFiles=configPath)
-    mdh = MeasurementDataHandler(device=labjack, configuration=config)
+    mdh = MeasurementDataHandler(device=labjack,stirrer=ministar40, configuration=config)
     exp_handler = ExperimentHandler(mdh=mdh)
     exp_handler.setPathToSave(pathToSave=savePath)
+    
     
     # GUI
     window = tk.Tk()
