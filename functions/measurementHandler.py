@@ -32,6 +32,7 @@ class MeasurementDataHandler():
 
         self.sensor_names = [s for s in self.SENSOR_LIST.keys()]
         self.sensor_names.insert(0, 'timestamp')
+        self.sensor_names.append('stirrer')
 
     def getSensorByName(self, name):
         return self.SENSOR_LIST[name]
@@ -69,6 +70,7 @@ class MeasurementDataHandler():
         '''returns the measured data as a list with timestamp'''
         data = [s.value for s in self.SENSOR_LIST.values()]
         data.insert(0, self.timestamp.strftime('%Y%m%d_%H%M%S_%f'))
+        data.append(self.stirrer.currentSpeed)
         return data
     
 if __name__ == '__main__':

@@ -104,20 +104,26 @@ class IKA_Ministar40():
         '''Read the direction of rotation'''
         return self._readCommand('IN_MODE \r\n')
 
-    def _readCommand(self, command: str) -> str:
-        with serial.Serial(self.device, '9600', timeout=1) as ser:
-            ser.write(command.encode("ascii"))
-            val = ser.readline().decode("ascii")
-            if ' ' in val:
-                val = val.split()
-                return val[0]
-            else:
-                return val
+    def _readCommand(self, command: str):
+        try:
+            with serial.Serial(self.device, '9600', timeout=1) as ser:
+                ser.write(command.encode("ascii"))
+                val = ser.readline().decode("ascii")
+                if ' ' in val:
+                    val = val.split()
+                    return val[0]
+                else:
+                    return val
+        except:
+            return None
 
     def _writeCommand(self, command: str) -> None:
-        with serial.Serial(self.device, '9600', timeout=1) as ser:
-            ser.write(command.encode("ascii"))
-            _ = ser.readline().decode("ascii")
+        try:
+            with serial.Serial(self.device, '9600', timeout=1) as ser:
+                ser.write(command.encode("ascii"))
+                _ = ser.readline().decode("ascii")
+        except:
+            pass
         
 
 import tkinter as tk
@@ -125,7 +131,7 @@ from tkinter import ttk
         
 class Frame_Stirrer(tk.Frame):
     def __init__(self, parent, stirrer: IKA_Ministar40):
-        super().__init__(master=parent)
+        super().__init__(master=parent, highlightbackground="gray", highlightthickness=1)
         self.stirrer = stirrer
 
         self.rowconfigure(0, weight=1)
