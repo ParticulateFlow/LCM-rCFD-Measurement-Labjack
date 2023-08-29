@@ -1,6 +1,6 @@
 # Experiment configuration file
 #COMMENT: 'A clever comment of the experiment I have made ;-)'
-COMMENT: 'step response'
+COMMENT: 'First test with stirrer'
 # Measurement
 SAMPLE_RATE: 3 # maximum of 3
 

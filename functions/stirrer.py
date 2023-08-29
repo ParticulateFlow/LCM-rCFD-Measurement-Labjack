@@ -32,7 +32,11 @@ class IKA_Ministar40():
     @property
     def currentSpeed(self) -> int:
         '''Read current speed value'''
-        return int(float(self._readCommand('IN_PV_4 \r\n')))
+        val = self._readCommand('IN_PV_4 \r\n')
+        if not val:
+            val = 0
+        else:
+            return int(float(val))
 
     @property
     def currentTorque(self) -> float:
@@ -123,7 +127,7 @@ class IKA_Ministar40():
                 ser.write(command.encode("ascii"))
                 _ = ser.readline().decode("ascii")
         except:
-            pass
+            print('Cannot write command')
         
 
 import tkinter as tk
@@ -131,12 +135,13 @@ from tkinter import ttk
         
 class Frame_Stirrer(tk.Frame):
     def __init__(self, parent, stirrer: IKA_Ministar40):
-        super().__init__(master=parent, highlightbackground="gray", highlightthickness=1)
+        super().__init__(master=parent, highlightbackground="gray", highlightthickness=1, padx=10,pady=10)
         self.stirrer = stirrer
 
         self.rowconfigure(0, weight=1)
         self.rowconfigure(1, weight=4)
         self.rowconfigure(2, weight=1)
+        self.rowconfigure((3,4), weight=1)
         self.columnconfigure((0,1), weight=1)
         
         # first column
@@ -158,12 +163,22 @@ class Frame_Stirrer(tk.Frame):
         ttk.Button(self.control, text='Reset Stirrer', command=self.stirrer.reset).pack()
         #ttk.Button(self.control, text='Read RPM', command=self.stirrer.readRPM).pack()
         self.control.grid(row=1, column=1, columnspan=2)
+
+        # current rpm
+        self.soll_rpm = tk.IntVar()
+        ttk.Label(self, text='Current RPM:', font=('Arial', 10)).grid(row=3,column=0, columnspan=2)
+        ttk.Label(self, textvariable=self.soll_rpm,  font=('Arial', 10, 'bold')).grid(row=4,column=0, columnspan=2)
+        self._update()
     
     def start(self):
         val = int(self.scale.get())
         self.stirrer.start()
         self.stirrer.set_ratedSpeed(val)
 
+    def _update(self):
+        val = self.stirrer.currentSpeed
+        self.soll_rpm.set(val)
+        self.after(1000,self._update)
 
 if __name__ == "__main__":
     stirrer = IKA_Ministar40(usbName = 'USB', speedLimit=120)
