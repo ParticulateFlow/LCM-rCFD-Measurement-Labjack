@@ -13,4 +13,4 @@ Flowmeter:
   warm_massflow: AIN11
   cold_massflow: AIN13
 Switch:
-  warm/cold: AIN10
+  bypass: AIN10
