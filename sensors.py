@@ -1,15 +1,14 @@
 from labjack import ljm
 from datetime import datetime
-import yaml
+import sys
 from abc import ABC, abstractmethod, abstractproperty
 
-
 class Sensor(ABC):
-    def setChannel(self, device: ljm, channel:str, name:str, ):
+    def setChannel(self, device:str, sensor_name:str, channel:str):
         '''Sets the channel information'''
-        self.device = device # labjack handler
+        self.device = device # labjack fandler
         self.channel = channel # AINx of labjack
-        self.name = name # sensor name
+        self.sensor_name = sensor_name # sensor name
         return self
 
     @property
@@ -32,8 +31,10 @@ class Sensor(ABC):
 
     def __repr__(self) -> str:
         '''representation of sensor e.g.: T1 = 25.1°C '''
-        if isinstance(self.value, float): return f'{self.name}: {self.value:.1f}{self.unit}'
-        elif isinstance(self.value, str): return f'{self.name}: {self.value}'
+        if isinstance(self.value, float):
+            return f'{self.sensor_name}:\t{self.value:.1f}{self.unit}'
+        else:
+            return f'{self.sensor_name}:\t{self.value}'
     
 class PT100(Sensor):
     ''' PT100 sensor
@@ -96,7 +97,7 @@ class Switch(Sensor):
         else: # warm
             return 'warm'
 
-class rCFD_Sensors():
+class MeasurementData():
     '''managing all sensors connected to the labjack device and configured by a yaml file'''
     def __init__(self, device: ljm, configFile: str) -> None:
         self.sensors = [] # list with all connected sensors [PT100, Flowmeter, Switch]
@@ -106,28 +107,20 @@ class rCFD_Sensors():
         
         for sensorType in labjackConfiguration:
             # PT100, Flowmeter, Switch
-            # sensCls is the sensor object
-            # sens is an instance
-            for name, channel in labjackConfiguration[sensorType].items():
-                sensCls = eval(sensorType) 
-                sens = sensCls()
-                sens.setChannel(device=device, channel=channel, name=name)
-                self.sensors.append(sens)
-
-    @property
-    def data(self) -> dict:
-        '''aquired data as dict'''
-        d = {'timestamp': datetime.now().strftime('%Y%m%d_%H%M%S_%f')}
-        for sensor in self.sensors:
-            d[sensor.name] = sensor.value
-        return d
+            for name, channel in sensorType:
+                sensor = getattr(sys.modules[__name__], sensorType)
+                sensor.setChannel(device, name, channel)
+                self.sensors.append(sensor)
         
 
 if __name__ == '__main__':
     # Test classes
-    labjackT7Pro = ljm.openS("T7", "ETHERNET", "ANY")
-    print('Labjack connected via ETHERNET')
-    rCFD = rCFD_Sensors(device=labjackT7Pro, configFile='labjack.yml')
+    import yaml
+    with open('labjack.yml', "r") as ymlfile:
+            labjackConfiguration = yaml.safe_load(ymlfile)
+    print(labjackConfiguration['PT100'].keys())
+
+    labjackT7Pro = ljm.openS("T7", "USB", "ANY")
 
 
 
