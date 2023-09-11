@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <meta name="author" content="">
+  <meta name="description" content="Liveview for sensor data">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+  <!---
+    <script src="{{url_for('static',filename='node_modules/plotly.js-dist/plotly.js')}}" charset="utf-8"></script>
+    <script src="https://cdn.plot.ly/plotly-2.25.2.min.js" charset="utf-8"></script>
+    --->
+  <script src="{{url_for('static',filename='node_modules/plotly.js-dist/plotly.js')}}" charset="utf-8"></script>
+
+</head>
+
+<body>
+
+  <p>Sensor Data</p>
+  <button id="b_start">START</button>
+  <button id="b_stop">STOP</button>
+  <button id="b_reset">RESET</button>
+  <div id="plot" style="width:1200px;height:450px;"></div>
+  <label for="stirrer_rpm">Drehzahl Rührer [RPM]</label>
+  <input type="range" id="stirrer_rpm" min="30" max="120">
+  <button id="b_start_stirrer">START Stirrer</button>
+  <button id="b_stop_stirrer">STOP Stirrer</button>
+  <div id="stirrer_status"></div>
+
+
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+
+</html>
