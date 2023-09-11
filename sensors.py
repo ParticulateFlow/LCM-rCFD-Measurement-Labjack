@@ -117,7 +117,7 @@ class rCFD_Sensors():
     @property
     def data(self) -> dict:
         '''aquired data as dict'''
-        d = {'timestamp': datetime.now().strftime('%Y%m%d_%H%M%S_%f')}
+        d = {'timestamp': datetime.now().isoformat()} #strftime('%Y%m%d_%H%M%S_%f')
         for sensor in self.sensors:
             d[sensor.name] = sensor.value
         return d
