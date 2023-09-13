@@ -23,12 +23,19 @@
   <button id="b_start">START</button>
   <button id="b_stop">STOP</button>
   <button id="b_reset">RESET</button>
-  <div id="plot" style="width:1200px;height:450px;"></div>
-  <label for="stirrer_rpm">Drehzahl Rührer [RPM]</label>
-  <input type="range" id="stirrer_rpm" min="30" max="120">
+  <br>
+  <div class="labels">Massflow cold: </div>
+  <div class="values" id="div_mass_cold">0</div>
+  <br>
+  <div class="labels">Masslfow warm: </div>
+  <div class="values" id="div_mass_warm">0</div>
+  <div class="chart" id="plot"></div>
+  <label for="rpm_stirrer">Drehzahl Rührer [RPM]</label>
+  <input type="range" id="stirrer_rpm" min="30" max="120" value="30">
   <button id="b_start_stirrer">START Stirrer</button>
+  <button id="b_update_stirrer">UPDATE Stirrer</button>
   <button id="b_stop_stirrer">STOP Stirrer</button>
-  <div id="stirrer_status"></div>
+  <div id="div_stirrer"></div>
 
 
   <script src="{{ url_for('static', filename='js/script.js') }}"></script>

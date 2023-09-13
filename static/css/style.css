@@ -1,0 +1,16 @@
+.chart{
+    width: 90vw;
+    height: 30vh;
+    margin: auto;
+}
+.labels{
+    text-align: left;
+    width: 10em;
+    font-weight: bold;
+    display: inline-block;
+}
+.values{
+    text-align: left;
+    width: 5em;
+    display: inline-block;
+}

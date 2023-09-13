@@ -24,20 +24,19 @@ const interval_ms = 1000 // 1 second
 const data_url = "/data"
 
 plotLayout = {
-    title: 'Messdaten',
+    title: "Messdaten",
     xaxis: {
-        title: 'Time in s',
-        rangemode: "tozero",
-        domain: [0.1, 1]
+        title: "Time in s",
+        rangemode: "tozero"
     },
     yaxis: {
         range: [20, 40],
-        title: 'Temperature in C°',
+        title: "Temperature in C°",
         position: 0
     },
     // yaxis2: {
     //     range: [0, 200],
-    //     title: 'Massflow in l/hr',
+    //     title: "Massflow in l/hr",
     //     overlaying: "y",
     //     side: "left",
     //     position: 0.07,
@@ -47,18 +46,24 @@ plotLayout = {
 
 }
 // variables for HTML elements
-plotDiv = document.getElementById('plot');
+div_plot = document.getElementById("plot");
 // --- measurement
-button_start = document.getElementById('b_start')
-button_stop = document.getElementById('b_stop')
-button_reset = document.getElementById('b_reset')
+button_start = document.getElementById("b_start")
+button_stop = document.getElementById("b_stop")
+button_reset = document.getElementById("b_reset")
 // --- stirrer
-button_start_stirrer = document.getElementById('b_start_stirrer')
-button_stop_stirrer = document.getElementById('b_stop_stirrer')
-slider_stirrer = document.getElementById('stirrer_rpm')
-status_stirrer = document.getElementById('stirrer_status')
+button_start_stirrer = document.getElementById("b_start_stirrer")
+button_stop_stirrer = document.getElementById("b_update_stirrer")
+button_stop_stirrer = document.getElementById("b_stop_stirrer")
+slider_stirrer = document.getElementById("rpm_stirrer")
+div_stirrer = document.getElementById("div_stirrer")
 
-// UI element functions
+// --- massflow div's
+div_massflow_cold = document.getElementById("div_mass_cold")
+div_massflow_warm = document.getElementById("div_mass_warm")
+
+
+// UI element Handler
 button_start.onclick = function () {
     if (!intervalID) {
         loadData()
@@ -94,14 +99,17 @@ button_reset.onclick = function () {
 }
 slider_stirrer.onchange = function () {
     stirrer_rpm = this.value
-    status_stirrer.innerHTML = stirrer_rpm
+    div_stirrer.innerHTML = stirrer_rpm
 
 }
 button_start_stirrer.onclick = function () {
-    //TODO
+    startStirrer()
+}
+button_update_stirrer.onclick = function () {
+    updateStirrer()
 }
 button_stop_stirrer.onclick = function () {
-    //TODO
+    stopStirrer()
 }
 
 // GENERAL FUNCTIONS
@@ -115,10 +123,11 @@ function renderPlot() {
     var trace_Twarm = {
         x: x_time,
         y: y_Twarm,
-        type: 'scatter',
-        name: 'Twarm',
+        type: "scatter",
+        name: "Twarm",
         line: {
-            color: '#FF0000' //red
+            color: "#FF0000", //red
+            width: 2
         },
         yaxis: "y1"
 
@@ -126,75 +135,77 @@ function renderPlot() {
     var trace_Tcold = {
         x: x_time,
         y: y_Tcold,
-        type: 'scatter',
-        name: 'Tcold',
+        type: "scatter",
+        name: "Tcold",
         line: {
-            color: '#0000FF' //blue
+            color: "#0000FF", //blue
+            width: 2
         }
     };
     var trace_Tout = {
         x: x_time,
         y: y_Tout,
-        type: 'scatter',
-        name: 'Tout',
+        type: "scatter",
+        name: "Tout",
         line: {
-            color: '#800080' //purple
+            color: "#000000", //black
+            width: 2
         }
     };
     var trace_h35 = {
         x: x_time,
         y: y_h35,
-        type: 'scatter',
-        name: 'h=35mm'
+        type: "scatter",
+        name: "h=35mm"
     };
     var trace_h65 = {
         x: x_time,
         y: y_h65,
-        type: 'scatter',
-        name: 'h=65mm'
+        type: "scatter",
+        name: "h=65mm"
     };
     var trace_h95 = {
         x: x_time,
         y: y_h95,
-        type: 'scatter',
-        name: 'h=95mm'
+        type: "scatter",
+        name: "h=95mm"
     };
     var trace_h125 = {
         x: x_time,
         y: y_h125,
-        type: 'scatter',
-        name: 'h=125mm'
+        type: "scatter",
+        name: "h=125mm"
     };
     var trace_h155 = {
         x: x_time,
         y: y_h155,
-        type: 'scatter',
-        name: 'h=35mm'
+        type: "scatter",
+        name: "h=35mm"
     };
     var trace_h185 = {
         x: x_time,
         y: y_h185,
-        type: 'scatter',
-        name: 'h=185mm'
+        type: "scatter",
+        name: "h=185mm"
     };
     var trace_h215 = {
         x: x_time,
         y: y_h215,
-        type: 'scatter',
-        name: 'h=215mm'
+        type: "scatter",
+        name: "h=215mm"
     };
     // var trace_Mwarm = {
     //     x: x_time,
     //     y: y_Mwarm,
-    //     type: 'scatter',
-    //     name: 'warmMassflow',
+    //     type: "scatter",
+    //     name: "warmMassflow",
     //     yaxis: "y2"
     // };
     // var trace_Mcold = {
     //     x: x_time,
     //     y: y_Mcold,
-    //     type: 'scatter',
-    //     name: 'coldMassflow',
+    //     type: "scatter",
+    //     name: "coldMassflow",
     //     yaxis: "y2"
     // };
     // add traces to Array
@@ -212,7 +223,7 @@ function renderPlot() {
         // trace_Mwarm,
         // trace_Mcold
     ]
-    Plotly.newPlot(plotDiv, plotDat, plotLayout) //create plot with trace array and layout
+    Plotly.newPlot(div_plot, plotDat, plotLayout) //create plot with trace array and layout
 }
 
 async function getData() {
@@ -237,11 +248,44 @@ async function getData() {
     y_h185.push(data.h185mm)
     y_h215.push(data.h215mm)
     // y_Mcold.push(data.coldMassflow)
+    div_massflow_cold.innerHTML = data.coldMassflow
     // y_Mwarm.push(data.warmMassflow)
+    div_massflow_warm.innerHTML = data.warmMassflow
 }
 
+
+// stirrer functions
+
+async function updateStirrer(){
+    var obj = {}
+    obj["rpm"] = stirrer_rpm
+    jsonString = JSON.stringify(obj)
+    console.log(jsonString)
+    const response = await fetch("/update-stirrer",{
+        method: "POST",
+        body: jsonString,
+        headers:{
+            "Content-type": "application/json; charset=UTF-8"
+        }
+    })
+    const data = await response.json()
+    console.log(data.rpm)
+}
 async function startStirrer(){
-    
+    const response = await fetch("/start-stirrer")
+    const data = await response.json()
+    if(!data.status){
+        alert("something went wrong")
+    }
+}
+async function stopStirrer(){
+    const response = await fetch("/stop-stirrer")
+    const data = await response.json()
+    if(!data.status){
+        alert("something went wrong")
+    }
 }
 
+
+// renders plot on load
 renderPlot()
