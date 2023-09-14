@@ -36,7 +36,7 @@ def startStirrer():
     return json.dumps({'status': status})
 
 @app.route('/update-stirrer', methods = ['POST'])
-def startStirrer():
+def updateStirrer():
     response = request.get_json()
     rpm = int(response['rpm'])
     status = True

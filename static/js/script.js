@@ -11,6 +11,7 @@ var y_h125 = []
 var y_h155 = []
 var y_h185 = []
 var y_h215 = []
+var plotDat = []
 // var y_Mwarm = []
 // var y_Mcold = []
 // var cnt = 0 //temporary for Timestamp
@@ -19,6 +20,9 @@ var stirrer_rpm	= 0
 // variable for starting and stopping interval handler
 let intervalID
 const interval_ms = 1000 // 1 second
+var start_block = null
+var end_block = null
+var curr_bypass = null
 
 // constant for data endpoint
 const data_url = "/data"
@@ -43,7 +47,6 @@ plotLayout = {
     //     anchor: "free"
     // }
 
-
 }
 // variables for HTML elements
 div_plot = document.getElementById("plot");
@@ -53,7 +56,7 @@ button_stop = document.getElementById("b_stop")
 button_reset = document.getElementById("b_reset")
 // --- stirrer
 button_start_stirrer = document.getElementById("b_start_stirrer")
-button_stop_stirrer = document.getElementById("b_update_stirrer")
+button_update_stirrer = document.getElementById("b_update_stirrer")
 button_stop_stirrer = document.getElementById("b_stop_stirrer")
 slider_stirrer = document.getElementById("rpm_stirrer")
 div_stirrer = document.getElementById("div_stirrer")
@@ -70,12 +73,10 @@ button_start.onclick = function () {
         intervalID = setInterval(loadData, interval_ms)
     }
 }
-
 button_stop.onclick = function () {
     clearInterval(intervalID)
     intervalID = null
 }
-
 button_reset.onclick = function () {
     if (intervalID) {
         clearInterval(intervalID)
@@ -237,7 +238,7 @@ function renderPlot() {
     //     yaxis: "y2"
     // };
     // add traces to Array
-    var plotDat = [
+    plotDat = [
         trace_Twarm,
         trace_Tcold,
         trace_Tout,
@@ -253,6 +254,23 @@ function renderPlot() {
     ]
     Plotly.newPlot(div_plot, plotDat, plotLayout) //create plot with trace array and layout
 }
+function drawRectangle(){
+    var rect = {
+        type: "rect",
+        xref: "x",
+        yref: "paper",
+        x0: start_block,
+        y0: 0,
+        x1: end_block,
+        y1: 1,
+        fillcolor: "#639fff",
+        opacity: 0.2,
+        line:{
+            width: 0
+        }
+    }
+    plotDat.push(rect)
+}
 
 async function getData() {
     // fetch json data
@@ -263,7 +281,8 @@ async function getData() {
         start_time = Date.parse(data.timestamp)
         x_time.push(0)
     } else {
-        x_time.push((Date.parse(data.timestamp) - start_time) / 1000)
+        var time = (Date.parse(data.timestamp) - start_time) / 1000
+        x_time.push(time)
     }
     y_Twarm.push(data.Twarm)
     y_Tcold.push(data.Tcold)
@@ -279,8 +298,16 @@ async function getData() {
     div_massflow_cold.innerHTML = data.coldMassflow
     // y_Mwarm.push(data.warmMassflow)
     div_massflow_warm.innerHTML = data.warmMassflow
+    if (curr_bypass != data.bypass){
+        if(curr_bypass == "warm"){
+            start_block = time
+        }else{
+            end_block = time
+            drawRectangle()
+        }
+        curr_bypass = data.bypasss
+    }
 }
-
 
 // stirrer functions
 
@@ -313,7 +340,6 @@ async function stopStirrer(){
         alert("something went wrong")
     }
 }
-
 
 // renders plot on load
 renderPlot()
