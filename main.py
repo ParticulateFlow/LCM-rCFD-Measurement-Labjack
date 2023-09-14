@@ -1,5 +1,6 @@
 from labjack import ljm
 from sensors import rCFD_Sensors
+import  functions.stirrer as stirrer
 import json 
 from flask import Flask, render_template, request
 

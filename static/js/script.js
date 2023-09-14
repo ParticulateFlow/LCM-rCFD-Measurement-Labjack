@@ -63,7 +63,7 @@ div_massflow_cold = document.getElementById("div_mass_cold")
 div_massflow_warm = document.getElementById("div_mass_warm")
 
 
-// UI element Handler
+// UI element handler
 button_start.onclick = function () {
     if (!intervalID) {
         loadData()
@@ -127,7 +127,7 @@ function renderPlot() {
         name: "Twarm",
         line: {
             color: "#FF0000", //red
-            width: 2
+            width: 3
         },
         yaxis: "y1"
 
@@ -139,7 +139,7 @@ function renderPlot() {
         name: "Tcold",
         line: {
             color: "#0000FF", //blue
-            width: 2
+            width: 3
         }
     };
     var trace_Tout = {
@@ -149,50 +149,78 @@ function renderPlot() {
         name: "Tout",
         line: {
             color: "#000000", //black
-            width: 2
+            width: 3
         }
     };
     var trace_h35 = {
         x: x_time,
         y: y_h35,
         type: "scatter",
-        name: "h=35mm"
+        name: "h=35mm",
+        line: {
+            // color: "#FF0000", //red
+            width: 1
+        }
     };
     var trace_h65 = {
         x: x_time,
         y: y_h65,
         type: "scatter",
-        name: "h=65mm"
+        name: "h=65mm",
+        line: {
+            // color: "#FF0000", //red
+            width: 1
+        }
     };
     var trace_h95 = {
         x: x_time,
         y: y_h95,
         type: "scatter",
-        name: "h=95mm"
+        name: "h=95mm",
+        line: {
+            // color: "#FF0000", //red
+            width: 1
+        }
     };
     var trace_h125 = {
         x: x_time,
         y: y_h125,
         type: "scatter",
-        name: "h=125mm"
+        name: "h=125mm",
+        line: {
+            // color: "#FF0000", //red
+            width: 1
+        }
     };
     var trace_h155 = {
         x: x_time,
         y: y_h155,
         type: "scatter",
-        name: "h=35mm"
+        name: "h=155mm",
+        line: {
+            // color: "#FF0000", //red
+            width: 1
+        }
     };
     var trace_h185 = {
         x: x_time,
         y: y_h185,
         type: "scatter",
-        name: "h=185mm"
+        name: "h=185mm",
+        line: {
+            // color: "#FF0000", //red
+            width: 1
+        }
     };
     var trace_h215 = {
         x: x_time,
         y: y_h215,
         type: "scatter",
-        name: "h=215mm"
+        name: "h=215mm",
+        line: {
+            // color: "#FF0000", //red
+            width: 1
+        }
     };
     // var trace_Mwarm = {
     //     x: x_time,
