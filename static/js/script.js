@@ -12,6 +12,7 @@ var y_h155 = []
 var y_h185 = []
 var y_h215 = []
 var plotDat = []
+var shapes =  []
 // var y_Mwarm = []
 // var y_Mcold = []
 // var cnt = 0 //temporary for Timestamp
@@ -20,34 +21,37 @@ var stirrer_rpm	= 0
 // variable for starting and stopping interval handler
 let intervalID
 const interval_ms = 1000 // 1 second
-var start_block = null
-var end_block = null
+var start_block = 0
 var curr_bypass = null
 
 // constant for data endpoint
 const data_url = "/data"
 
-plotLayout = {
-    title: "Messdaten",
-    xaxis: {
-        title: "Time in s",
-        rangemode: "tozero"
-    },
-    yaxis: {
-        range: [20, 40],
-        title: "Temperature in C°",
-        position: 0
-    },
-    // yaxis2: {
-    //     range: [0, 200],
-    //     title: "Massflow in l/hr",
-    //     overlaying: "y",
-    //     side: "left",
-    //     position: 0.07,
-    //     anchor: "free"
-    // }
+function updateLayout(){
+    plotLayout = {
+        title: "Messdaten",
+        xaxis: {
+            title: "Time in s",
+            rangemode: "tozero"
+        },
+        yaxis: {
+            range: [20, 40],
+            title: "Temperature in C°",
+            position: 0
+        },
+        shapes: shapes
+        // yaxis2: {
+        //     range: [0, 200],
+        //     title: "Massflow in l/hr",
+        //     overlaying: "y",
+        //     side: "left",
+        //     position: 0.07,
+        //     anchor: "free"
+        // }
 
+    }
 }
+
 // variables for HTML elements
 div_plot = document.getElementById("plot");
 // --- measurement
@@ -92,9 +96,11 @@ button_reset.onclick = function () {
     y_h155 = []
     y_h185 = []
     y_h215 = []
+    shapes = []
+    updateLayout()
     // y_Mwarm = []
     // y_Mcold = []
-
+    curr_bypass = null
     start_time = null
     renderPlot()
 }
@@ -223,6 +229,21 @@ function renderPlot() {
             width: 1
         }
     };
+    var rect1 = {
+        name:"warm bypass",
+        type: "rect",
+        xref: "x",
+        yref: "paper",
+        x0: 0,
+        y0: 0,
+        x1: 3,
+        y1: 1,
+        fillcolor: "#639fff",
+        opacity: 0.2,
+        line:{
+            width: 0
+        }
+    };
     // var trace_Mwarm = {
     //     x: x_time,
     //     y: y_Mwarm,
@@ -248,28 +269,37 @@ function renderPlot() {
         trace_h125,
         trace_h155,
         trace_h185,
-        trace_h215,
+        trace_h215
         // trace_Mwarm,
         // trace_Mcold
     ]
     Plotly.newPlot(div_plot, plotDat, plotLayout) //create plot with trace array and layout
 }
-function drawRectangle(){
+function drawRectangle(bypass){
+    if (bypass =="cold"){
+        colorcode = "#6ec0ff"
+    }else{
+        colorcode = "#c23000"
+    }
     var rect = {
+        name:"bypass",
         type: "rect",
         xref: "x",
         yref: "paper",
         x0: start_block,
         y0: 0,
-        x1: end_block,
+        x1: start_block,
         y1: 1,
-        fillcolor: "#639fff",
+        fillcolor: colorcode,
         opacity: 0.2,
         line:{
             width: 0
         }
     }
-    plotDat.push(rect)
+    shapes.push(rect)
+}
+function updateRectangle(time){
+    shapes[shapes.length-1].x1 = time
 }
 
 async function getData() {
@@ -277,11 +307,12 @@ async function getData() {
     const response = await fetch(data_url)
     const data = await response.json()
     // add json data to corresponding array
+    var time = 0
     if (start_time == null) {
         start_time = Date.parse(data.timestamp)
-        x_time.push(0)
+        x_time.push(time)
     } else {
-        var time = (Date.parse(data.timestamp) - start_time) / 1000
+        time = (Date.parse(data.timestamp) - start_time) / 1000
         x_time.push(time)
     }
     y_Twarm.push(data.Twarm)
@@ -298,14 +329,23 @@ async function getData() {
     div_massflow_cold.innerHTML = data.coldMassflow
     // y_Mwarm.push(data.warmMassflow)
     div_massflow_warm.innerHTML = data.warmMassflow
-    if (curr_bypass != data.bypass){
-        if(curr_bypass == "warm"){
-            start_block = time
-        }else{
-            end_block = time
-            drawRectangle()
-        }
-        curr_bypass = data.bypasss
+    var bypass = data.bypass
+    if (curr_bypass == null){
+        start_block = time
+        
+        drawRectangle(bypass)
+        updateLayout()
+        curr_bypass = bypass
+    }else if (curr_bypass != bypass){
+        start_block = time
+        updateRectangle(time)
+        drawRectangle(bypass)
+        updateLayout()
+        curr_bypass = bypass
+        
+    }else{
+        updateRectangle(time)
+        updateLayout()
     }
 }
 
@@ -315,7 +355,6 @@ async function updateStirrer(){
     var obj = {}
     obj["rpm"] = stirrer_rpm
     jsonString = JSON.stringify(obj)
-    console.log(jsonString)
     const response = await fetch("/update-stirrer",{
         method: "POST",
         body: jsonString,
@@ -324,7 +363,6 @@ async function updateStirrer(){
         }
     })
     const data = await response.json()
-    console.log(data.rpm)
 }
 async function startStirrer(){
     const response = await fetch("/start-stirrer")
@@ -342,4 +380,5 @@ async function stopStirrer(){
 }
 
 // renders plot on load
+updateLayout()
 renderPlot()
