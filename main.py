@@ -1,6 +1,6 @@
 from labjack import ljm
 from sensors import rCFD_Sensors
-# import  functions.stirrer as stirrer
+from stirrer import IKA_Ministar40
 import json 
 from flask import Flask, render_template, request
 
@@ -11,12 +11,21 @@ configFile = 'labjack.yml'
 try:
     labjack = ljm.openS(DEVICE, CONNECTION, "ANY")
     print(f"Connected to {DEVICE} via {CONNECTION}")
-    rCFD = rCFD_Sensors(device=labjack,configFile=configFile)
-    print('All sensors initialized')
 except:
     print(f'Failure - could not connected to {DEVICE}')
     exit()
 
+try:
+    rCFD = rCFD_Sensors(device=labjack,configFile=configFile)
+    print('All sensors initialized')
+except:
+    print('Could not initialize Sensors')
+
+try:
+    stirrer = IKA_Ministar40(usbName = 'USB', speedLimit=120)
+    print(f"{stirrer.device} connected")
+except:
+    print("Could not connect to stirrer")
 
 app = Flask(__name__)
 @app.route('/data')
@@ -31,6 +40,7 @@ def index():
 
 @app.route('/start-stirrer')
 def startStirrer():
+    stirrer.start()
     status = True
     # TODO starting function in stirrer file 'start()->boolean'
     return json.dumps({'status': status})
@@ -39,6 +49,7 @@ def startStirrer():
 def updateStirrer():
     response = request.get_json()
     rpm = int(response['rpm'])
+    stirrer.set_ratedSpeed(rpm)
     status = True
     # TODO: rpm update function in stirrer file 'set_rpm(rpm)->boolean'
     return json.dumps({'status': status, 'rpm':rpm})
@@ -46,6 +57,7 @@ def updateStirrer():
 @app.route('/stop-stirrer')
 def stopStirrer():
     # TODO stopping function in stirrer file 'stop()->boolean'
+    stirrer.stop()
     status = True
     return json.dumps({'status': status})
 
