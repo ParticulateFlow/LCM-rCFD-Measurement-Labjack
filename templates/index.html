@@ -20,8 +20,12 @@
 <body>
 
   <p>Sensor Data</p>
-  <button id="b_start">START</button>
-  <button id="b_stop">STOP</button>
+  <!-- toggle for recording  -->
+  <br>
+  <label class="switch">
+    <input type="checkbox" id="t_recording">
+    <span class="slider round"></span>
+  </label>
   <button id="b_reset">RESET</button>
   <br>
   <div class="labels">Massflow cold: </div>
@@ -31,12 +35,13 @@
   <div class="values" id="div_mass_warm">0</div>
   <div class="chart" id="plot"></div>
   <label for="rpm_stirrer">Drehzahl Rührer [RPM]</label>
-  <input type="range" id="rpm_stirrer" min="30" max="120" value="30">
-  <button id="b_start_stirrer">START Stirrer</button>
-  <button id="b_update_stirrer">UPDATE Stirrer</button>
-  <button id="b_stop_stirrer">STOP Stirrer</button>
-  <div id="div_stirrer"></div>
-
+  <input type="range" id="rpm_stirrer" min="30" max="120" value="30"><span id="div_stirrer"></span>
+  <!-- Toggle for Stirrer -->
+  <br>
+  <label class="switch">
+    <input type="checkbox" id="t_stirrer">
+    <span class="slider round"></span>
+  </label>
 
   <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>

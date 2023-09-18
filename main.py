@@ -32,32 +32,34 @@ app = Flask(__name__)
 def data():
     return json.dumps(rCFD.data)
 
-
 @app.route('/')
 def index():
     return render_template('index.html')
 
-
-@app.route('/start-stirrer')
-def startStirrer():
-    stirrer.start()
-    status = True
-    # TODO starting function in stirrer file 'start()->boolean'
-    return json.dumps({'status': status})
-
-@app.route('/update-stirrer', methods = ['POST'])
+@app.route('/stirrer', methods = ['POST'])
 def updateStirrer():
     response = request.get_json()
     rpm = int(response['rpm'])
-    stirrer.set_ratedSpeed(rpm)
+    t = int(response['type'])
+    if t == 'start':
+        #TODO: function for starting -> boolean
+        x=0 #delete after adding function
+    else:
+        #TODO: function for stopping -> boolean
+        x=0 #delete after adding function
     status = True
-    # TODO: rpm update function in stirrer file 'set_rpm(rpm)->boolean'
     return json.dumps({'status': status, 'rpm':rpm})
 
-@app.route('/stop-stirrer')
-def stopStirrer():
-    # TODO stopping function in stirrer file 'stop()->boolean'
-    stirrer.stop()
+@app.route('/recording', methods = ['POST'])
+def updateRecording():
+    response = request.get_json()
+    t = int(response['type'])
+    if t == 'start':
+        #function for starting -> boolean
+        x=0 #delete after adding function
+    else:
+        #function for stopping -> boolean
+        x=0 #delete after adding function
     status = True
     return json.dumps({'status': status})
 

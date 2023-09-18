@@ -13,19 +13,27 @@ var y_h185 = []
 var y_h215 = []
 var plotDat = []
 var shapes =  []
-// var y_Mwarm = []
-// var y_Mcold = []
-// var cnt = 0 //temporary for Timestamp
 var stirrer_rpm	= 0
-
 // variable for starting and stopping interval handler
 let intervalID
 const interval_ms = 1000 // 1 second
 var start_block = 0
 var curr_bypass = null
-
 // constant for data endpoint
-const data_url = "/data"
+const data_url = "http://140.78.134.203:5000/data"
+
+plotLayout = {
+    title: "Messdaten",
+    xaxis: {
+        title: "Time in s",
+        rangemode: "tozero"
+    },
+    yaxis: {
+        range: [20, 40],
+        title: "Temperature in C°",
+        position: 0
+    }
+}
 
 function updateLayout(){
     plotLayout = {
@@ -40,51 +48,40 @@ function updateLayout(){
             position: 0
         },
         shapes: shapes
-        // yaxis2: {
-        //     range: [0, 200],
-        //     title: "Massflow in l/hr",
-        //     overlaying: "y",
-        //     side: "left",
-        //     position: 0.07,
-        //     anchor: "free"
-        // }
-
     }
 }
-
 // variables for HTML elements
 div_plot = document.getElementById("plot");
 // --- measurement
-button_start = document.getElementById("b_start")
-button_stop = document.getElementById("b_stop")
+toggle_recording = document.getElementById("t_recording")
 button_reset = document.getElementById("b_reset")
 // --- stirrer
-button_start_stirrer = document.getElementById("b_start_stirrer")
-button_update_stirrer = document.getElementById("b_update_stirrer")
-button_stop_stirrer = document.getElementById("b_stop_stirrer")
 slider_stirrer = document.getElementById("rpm_stirrer")
 div_stirrer = document.getElementById("div_stirrer")
-
+toggle_stirrer = document.getElementById("t_stirrer")
 // --- massflow div's
 div_massflow_cold = document.getElementById("div_mass_cold")
 div_massflow_warm = document.getElementById("div_mass_warm")
-
-
 // UI element handler
-button_start.onclick = function () {
-    if (!intervalID) {
-        loadData()
-        intervalID = setInterval(loadData, interval_ms)
+toggle_recording.onchange = function(){
+    var type
+    if(this.checked){
+        type = "start"
+    }else{
+        type = "stop"
     }
+    recording(type)
 }
-button_stop.onclick = function () {
-    clearInterval(intervalID)
-    intervalID = null
+toggle_stirrer.onchange = function(){
+    var type
+    if(this.checked){
+        type = "start"
+    }else{
+        type = "stop"
+    }
+    stirrer(type)
 }
 button_reset.onclick = function () {
-    if (intervalID) {
-        clearInterval(intervalID)
-    }
     x_time = []
     y_Twarm = []
     y_Tcold = []
@@ -98,8 +95,6 @@ button_reset.onclick = function () {
     y_h215 = []
     shapes = []
     updateLayout()
-    // y_Mwarm = []
-    // y_Mcold = []
     curr_bypass = null
     start_time = null
     renderPlot()
@@ -109,22 +104,11 @@ slider_stirrer.onchange = function () {
     div_stirrer.innerHTML = stirrer_rpm
 
 }
-button_start_stirrer.onclick = function () {
-    startStirrer()
-}
-button_update_stirrer.onclick = function () {
-    updateStirrer()
-}
-button_stop_stirrer.onclick = function () {
-    stopStirrer()
-}
-
-// GENERAL FUNCTIONS
+// general functions
 function loadData() {
     getData()
     renderPlot()
 }
-
 function renderPlot() {
     // create traces for the plot
     var trace_Twarm = {
@@ -244,20 +228,6 @@ function renderPlot() {
             width: 0
         }
     };
-    // var trace_Mwarm = {
-    //     x: x_time,
-    //     y: y_Mwarm,
-    //     type: "scatter",
-    //     name: "warmMassflow",
-    //     yaxis: "y2"
-    // };
-    // var trace_Mcold = {
-    //     x: x_time,
-    //     y: y_Mcold,
-    //     type: "scatter",
-    //     name: "coldMassflow",
-    //     yaxis: "y2"
-    // };
     // add traces to Array
     plotDat = [
         trace_Twarm,
@@ -269,9 +239,8 @@ function renderPlot() {
         trace_h125,
         trace_h155,
         trace_h185,
-        trace_h215
-        // trace_Mwarm,
-        // trace_Mcold
+        trace_h215,
+
     ]
     Plotly.newPlot(div_plot, plotDat, plotLayout) //create plot with trace array and layout
 }
@@ -301,7 +270,6 @@ function drawRectangle(bypass){
 function updateRectangle(time){
     shapes[shapes.length-1].x1 = time
 }
-
 async function getData() {
     // fetch json data
     const response = await fetch(data_url)
@@ -325,9 +293,7 @@ async function getData() {
     y_h155.push(data.h155mm)
     y_h185.push(data.h185mm)
     y_h215.push(data.h215mm)
-    // y_Mcold.push(data.coldMassflow)
     div_massflow_cold.innerHTML = data.coldMassflow
-    // y_Mwarm.push(data.warmMassflow)
     div_massflow_warm.innerHTML = data.warmMassflow
     var bypass = data.bypass
     if (curr_bypass == null){
@@ -348,14 +314,13 @@ async function getData() {
         updateLayout()
     }
 }
-
-// stirrer functions
-
-async function updateStirrer(){
+// control functions
+async function stirrer(type){
     var obj = {}
+    obj["type"] = type  // start/stop
     obj["rpm"] = stirrer_rpm
     jsonString = JSON.stringify(obj)
-    const response = await fetch("/update-stirrer",{
+    const response = await fetch("/stirrer",{
         method: "POST",
         body: jsonString,
         headers:{
@@ -363,22 +328,29 @@ async function updateStirrer(){
         }
     })
     const data = await response.json()
+    if(!data.status){
+        alert("something went wrong")
+    }
 }
-async function startStirrer(){
-    const response = await fetch("/start-stirrer")
+async function recording(type){
+    var obj = {}
+    obj["type"] = type  // start/stop
+    const response = await fetch("/recording",{
+        method: "POST",
+        body: jsonString,
+        headers:{
+            "Content-type": "application/json; charset=UTF-8"
+        }
+    })
     const data = await response.json()
     if(!data.status){
         alert("something went wrong")
     }
 }
-async function stopStirrer(){
-    const response = await fetch("/stop-stirrer")
-    const data = await response.json()
-    if(!data.status){
-        alert("something went wrong")
-    }
+// page load function
+window.onload = function(){
+    toggle_recording.checked = false
+    toggle_stirrer.checked = false
+    loadData()
+    intervalID = setInterval(loadData,interval_ms)
 }
-
-// renders plot on load
-updateLayout()
-renderPlot()
