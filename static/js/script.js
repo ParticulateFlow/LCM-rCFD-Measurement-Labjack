@@ -13,7 +13,7 @@ var y_h185 = []
 var y_h215 = []
 var plotDat = []
 var shapes =  []
-var stirrer_rpm	= 0
+var stirrer_rpm	= 30
 // variable for starting and stopping interval handler
 let intervalID
 const interval_ms = 1000 // 1 second
@@ -30,7 +30,7 @@ plotLayout = {
     },
     yaxis: {
         range: [20, 40],
-        title: "Temperature in C°",
+        title: "Temperature in °C",
         position: 0
     }
 }
@@ -62,7 +62,9 @@ toggle_stirrer = document.getElementById("t_stirrer")
 // --- massflow div's
 div_massflow_cold = document.getElementById("div_mass_cold")
 div_massflow_warm = document.getElementById("div_mass_warm")
+
 // UI element handler
+div_stirrer.innerHTML = stirrer_rpm // set init value
 toggle_recording.onchange = function(){
     var type
     if(this.checked){
@@ -79,7 +81,7 @@ toggle_stirrer.onchange = function(){
     }else{
         type = "stop"
     }
-    stirrer(type)
+    stirrer_startStop(type)
 }
 button_reset.onclick = function () {
     x_time = []
@@ -102,6 +104,7 @@ button_reset.onclick = function () {
 slider_stirrer.onchange = function () {
     stirrer_rpm = this.value
     div_stirrer.innerHTML = stirrer_rpm
+    stirrer_update(stirrer_rpm)
 
 }
 // general functions
@@ -315,12 +318,28 @@ async function getData() {
     }
 }
 // control functions
-async function stirrer(type){
+async function stirrer_startStop(type){
     var obj = {}
     obj["type"] = type  // start/stop
-    obj["rpm"] = stirrer_rpm
     jsonString = JSON.stringify(obj)
-    const response = await fetch("/stirrer",{
+    const response = await fetch("/stirrer_startStop",{
+        method: "POST",
+        body: jsonString,
+        headers:{
+            "Content-type": "application/json; charset=UTF-8"
+        }
+    })
+    const data = await response.json()
+    if(!data.status){
+        alert("something went wrong")
+    }
+}
+
+async function stirrer_update(rpm){
+    var obj = {}
+    obj["rpm"] = rpm
+    jsonString = JSON.stringify(obj)
+    const response = await fetch("/stirrer_update",{
         method: "POST",
         body: jsonString,
         headers:{
@@ -335,6 +354,7 @@ async function stirrer(type){
 async function recording(type){
     var obj = {}
     obj["type"] = type  // start/stop
+    jsonString = JSON.stringify(obj)
     const response = await fetch("/recording",{
         method: "POST",
         body: jsonString,

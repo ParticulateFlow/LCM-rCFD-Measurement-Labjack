@@ -12,8 +12,7 @@ class IKA_Ministar40():
         except:
             raise ConnectionError("Device not connected")
 
-        print("Device found:")
-        print(f"{ports[index].name}:{ports[index].description}")
+        print(f"Stirrer found on Port {ports[index].name}")
         self.device = ports[index].name
 
         self.reset()
@@ -77,7 +76,7 @@ class IKA_Ministar40():
         self._writeCommand(f'OUT_SP_6 {rpmLimit}\r\n')
 
     def set_safetyLimit(self, safetyLimit: int) -> None:
-        '''Adjust the safety spped value'''
+        '''Adjust the safety speed value'''
         self._writeCommand(f'OUT_SP_8 {safetyLimit}\r\n')
     
     def start(self) -> None:
