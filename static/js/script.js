@@ -14,6 +14,10 @@ var y_h215 = []
 var plotDat = []
 var shapes =  []
 var stirrer_rpm	= 30
+// variables for autoranging
+var range_min
+var range_max
+
 // variable for starting and stopping interval handler
 let intervalID
 const interval_ms = 1000 // 1 second
@@ -36,19 +40,21 @@ plotLayout = {
 }
 
 function updateLayout(){
-    plotLayout = {
-        title: "Messdaten",
-        xaxis: {
-            title: "Time in s",
-            rangemode: "tozero"
-        },
-        yaxis: {
-            range: [20, 40],
-            title: "Temperature in C°",
-            position: 0
-        },
-        shapes: shapes
-    }
+    // plotLayout = {
+    //     title: "Messdaten",
+    //     xaxis: {
+    //         title: "Time in s",
+    //         rangemode: "tozero"
+    //     },
+    //     yaxis: {
+    //         range: [20, 40],
+    //         title: "Temperature in C°",
+    //         position: 0
+    //     },
+    //     shapes: shapes
+    // }
+    plotLayout.shapes = shapes
+    plotLayout.yaxis.range = [range_min-5,range_max+5]
 }
 // variables for HTML elements
 div_plot = document.getElementById("plot");
@@ -236,14 +242,13 @@ function renderPlot() {
         trace_Twarm,
         trace_Tcold,
         trace_Tout,
-        trace_h35,
-        trace_h65,
-        trace_h95,
-        trace_h125,
-        trace_h155,
-        trace_h185,
         trace_h215,
-
+        trace_h185,
+        trace_h155,
+        trace_h125,
+        trace_h95,
+        trace_h65,
+        trace_h35
     ]
     Plotly.newPlot(div_plot, plotDat, plotLayout) //create plot with trace array and layout
 }
@@ -314,6 +319,23 @@ async function getData() {
         
     }else{
         updateRectangle(time)
+        updateLayout()
+    }
+    data_list = [
+        data.Twarm, 
+        data.Tcold, 
+        data.Tout, 
+        data.h35mm, 
+        data.h65mm, 
+        data.h95mm, 
+        data.h125mm, 
+        data.h155mm, 
+        data.h185mm, 
+        data.h215mm
+    ]
+    if (max(data_list) > range_max || min(data_list) < range_min){
+        range_max = max(data_list)
+        range_min = min(data_list)
         updateLayout()
     }
 }
