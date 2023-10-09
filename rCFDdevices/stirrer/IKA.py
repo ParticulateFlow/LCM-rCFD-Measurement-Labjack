@@ -3,20 +3,25 @@ import serial.tools.list_ports
 
 class IKA_Ministar40():
     '''Control class for the IKA ministar 40'''
-    def __init__(self,usbName:str, speedLimit: int) -> None:
+    def __init__(self, port: str, speedLimit: int) -> None:
+
+        print("+ IKA Ministar 40")
+
         # Find right port
-        ports = serial.tools.list_ports.comports() #all available Ports
-        nameList = [ports[i].description for i in range(len(ports))]
+        portObjects = serial.tools.list_ports.comports() #all available Ports
+        nameList = [portObjects[i].description for i in range(len(portObjects))]
         try:
-            index = [idx for idx, s in enumerate(nameList) if usbName in s][0]
+            index = [idx for idx, s in enumerate(nameList) if port in s][0]
+            self.device = portObjects[index].name
+
+            self.reset()
+            self.set_speedLimit(speedLimit + 1)
+            print(f"++ Stirrer found on Port {portObjects[index].name}")
+            print("++ Device ready to use")
         except:
-            raise ConnectionError("Device not connected")
-
-        print(f"Stirrer found on Port {ports[index].name}")
-        self.device = ports[index].name
-
-        self.reset()
-        self.set_speedLimit(speedLimit)
+            print("++ Stirrer not connected")
+            print('++ Debug Mode on')
+            self.device = None
 
     @property
     def deviceName(self) -> str:
@@ -107,6 +112,11 @@ class IKA_Ministar40():
         return self._readCommand('IN_MODE \r\n')
 
     def _readCommand(self, command: str):
+        if not self.device:
+            print("Read Command")
+            print(command)
+            return
+        
         try:
             with serial.Serial(self.device, '9600', timeout=1) as ser:
                 ser.write(command.encode("ascii"))
@@ -120,11 +130,20 @@ class IKA_Ministar40():
             return None
 
     def _writeCommand(self, command: str) -> None:
+        if not self.device:
+            print("Write Command")
+            print(command)
+            return
+
+
         try:
             with serial.Serial(self.device, '9600', timeout=1) as ser:
                 ser.write(command.encode("ascii"))
                 _ = ser.readline().decode("ascii")
         except:
             print('Cannot write command')
+
+if __name__ == '__main__':
+    IKA_Ministar40(port='COM9', speedLimit=120)
 
 

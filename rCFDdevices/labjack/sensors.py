@@ -1,8 +1,6 @@
 from labjack import ljm
-from datetime import datetime
-import yaml
 from abc import ABC, abstractmethod, abstractproperty
-
+import random
 
 class Sensor(ABC):
     def setChannel(self, device: ljm, channel:str, name:str, ):
@@ -15,6 +13,10 @@ class Sensor(ABC):
     @property
     def voltage(self) -> float:
         '''labjack voltage'''
+        if not self.device:
+            # Debug mode
+            return round(random.uniform(0, 10), 1)
+        
         u = round(ljm.eReadName(self.device, self.channel),4)
         if -0.5 < u < 0: u = 0
         elif u < -0.5: raise ValueError('negative input voltage')
@@ -96,38 +98,6 @@ class Switch(Sensor):
         else: # warm
             return 'warm'
 
-class rCFD_Sensors():
-    '''managing all sensors connected to the labjack device and configured by a yaml file'''
-    def __init__(self, device: ljm, configFile: str) -> None:
-        self.sensors = [] # list with all connected sensors [PT100, Flowmeter, Switch]
-
-        with open(configFile, "r") as ymlfile:
-            labjackConfiguration = yaml.safe_load(ymlfile)
-        
-        for sensorType in labjackConfiguration:
-            # PT100, Flowmeter, Switch
-            # sensCls is the sensor object
-            # sens is an instance
-            for name, channel in labjackConfiguration[sensorType].items():
-                sensCls = eval(sensorType) 
-                sens = sensCls()
-                sens.setChannel(device=device, channel=channel, name=name)
-                self.sensors.append(sens)
-
-    @property
-    def data(self) -> dict:
-        '''aquired data as dict'''
-        d = {'timestamp': datetime.now().isoformat()} #strftime('%Y%m%d_%H%M%S_%f')
-        for sensor in self.sensors:
-            d[sensor.name] = sensor.value
-        return d
-        
-
-if __name__ == '__main__':
-    # Test classes
-    labjackT7Pro = ljm.openS("T7", "ETHERNET", "ANY")
-    print('Labjack connected via ETHERNET')
-    rCFD = rCFD_Sensors(device=labjackT7Pro, configFile='labjack.yml')
 
 
 

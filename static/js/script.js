@@ -24,7 +24,8 @@ const interval_ms = 1000 // 1 second
 var start_block = 0
 var curr_bypass = null
 // constant for data endpoint
-const data_url = "http://140.78.134.203:5000/data"
+//const data_url = "http://140.78.134.203:5000/data"
+const data_url = "http://140.78.134.239:5000/data" //michael pc
 
 plotLayout = {
     title: "Messdaten",
@@ -33,7 +34,6 @@ plotLayout = {
         rangemode: "tozero"
     },
     yaxis: {
-        range: [20, 40],
         title: "Temperature in °C",
         position: 0
     }
@@ -87,7 +87,7 @@ toggle_stirrer.onchange = function(){
     }else{
         type = "stop"
     }
-    stirrer_startStop(type)
+    stirrer_startStop(type, slider_stirrer.value)
 }
 button_reset.onclick = function () {
     x_time = []
@@ -340,9 +340,10 @@ async function getData() {
     }
 }
 // control functions
-async function stirrer_startStop(type){
+async function stirrer_startStop(type, rpm){
     var obj = {}
     obj["type"] = type  // start/stop
+    obj["rpm"] = rpm
     jsonString = JSON.stringify(obj)
     const response = await fetch("/stirrer_startStop",{
         method: "POST",
