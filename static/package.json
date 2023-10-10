@@ -1,0 +1,21 @@
+{
+  "name": "static",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --progress --mode=development"
+  },
+  "author": "Sebastian Schauer",
+  "license": "",
+  "dependencies": {
+    "@kitware/vtk.js": "^28.12.4",
+    "plotly.js-dist": "^2.26.0"
+  },
+  "devDependencies": {
+    "webpack": "^5.88.2",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1"
+  }
+}

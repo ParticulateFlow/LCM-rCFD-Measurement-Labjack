@@ -92,5 +92,24 @@ def updateRecording():
 
     return json.dumps({'status': True})
 
+# Visualisation Route
+@app.route('/visualisation')
+def visualisation():
+    return render_template('vtk.html')
+
+# Simulation Data TODO
+@app.route('/simulation')
+def simulationData():
+    location = list()
+    location.append([0,0,0])
+    location.append([50,0,0])
+    location.append([150,0,0])
+    values = list()
+    values.append(20)
+    values.append(50)
+    values.append(80)
+    return json.dumps({'location':location,'values':values})
+
+
 if __name__ == '__main__':
     app.run(port=5000, host='0.0.0.0')
